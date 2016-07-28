@@ -14,7 +14,8 @@ import time
 import argparse
 import configparser
 import astropy.units as u
-import pseff
+
+from .pseff import PSFcube, TelescopeThroughput, SED
 
 
 def parse_args():
@@ -99,13 +100,13 @@ def main():
     start_time = time.time()
 
     for psf_file in args.psf_cube_files:
-        psf = pseff.PSFcube.from_fits(psf_file, **conf['psf'])
-        thruput = pseff.TelescopeThroughput.from_file(**conf['thruput'])
+        psf = PSFcube.from_fits(psf_file, **conf['psf'])
+        thruput = TelescopeThroughput.from_file(**conf['thruput'])
         for sed_file in args.sed_files:
             if conf['sed_type'].lower() == 'fits':
-                sed = pseff.SED.from_fits(sed_file, **conf['sed'])
+                sed = SED.from_fits(sed_file, **conf['sed'])
             else:
-                sed = pseff.SED.from_ascii(sed_file, **conf['sed'])
+                sed = SED.from_ascii(sed_file, **conf['sed'])
 
             psf.to_broadband(sed=sed, thruput=thruput, **conf['broadband'])
 

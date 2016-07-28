@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-PSefF
-=====
-Convert a series of monochromatic PSF images into an instrumental
-broadband PSF given a stellar spectral energy distribution
-
-"""
 from __future__ import print_function, division
 
 import os
@@ -19,6 +12,10 @@ import scipy.interpolate as spi
 
 
 __version__ = '0.1.0'
+__all__ = ['SED',
+           'FlatSED',
+           'TelescopeThroughput',
+           'PSFcube']
 
 
 class SED(object):

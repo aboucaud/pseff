@@ -10,7 +10,7 @@ import numpy.fft as npf
 import scipy.ndimage as spn
 import scipy.interpolate as spi
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __all__ = ['SED', 'FlatSED', 'TelescopeThroughput', 'PSFcube']
 
 
@@ -326,8 +326,10 @@ class PSFcube(object):
 
         # Apply the Niemi Effect (WL Dependant)
         if niemi:
+            # Make sure wavelength is in nanometers
+            wl_range = self.expanded_range * self.wlunit.to(u.nm)
             expanded_wf *= self.niemi_effect(expanded_wf.shape,
-                                             self.expanded_range,
+                                             wl_range,
                                              self.pixel_size)
 
         # Integrate of wavelength range
@@ -335,11 +337,12 @@ class PSFcube(object):
 
         # Apply AOCS Effect to the coadded PSF (Not WL Dependant)
         if aocs:
-            broadband_wf *= self.aocs_effect()
+            broadband_wf *= self.aocs_effect(broadband_wf.shape,
+                                             self.pixel_size)
 
         # Apply SubPixel Response Effect to the coadded PSF (Not WL Dependant)
         if prf:
-            broadband_wf *= self.pixelresponse_effect()
+            broadband_wf *= self.pixelresponse_effect(broadband_wf.shape)
 
         broadband_psf = np.abs(npf.ifftshift(npf.irfft2(broadband_wf)))
 

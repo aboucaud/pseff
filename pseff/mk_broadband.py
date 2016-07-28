@@ -96,13 +96,22 @@ def main():
     args = parse_args()
 
     conf = extract_config(args.config)
+    thruput = TelescopeThroughput.from_file(**conf['thruput'])
 
     start_time = time.time()
 
     for psf_file in args.psf_cube_files:
-        psf = PSFcube.from_fits(psf_file, **conf['psf'])
-        thruput = TelescopeThroughput.from_file(**conf['thruput'])
         for sed_file in args.sed_files:
+            psf_basename = os.path.basename(os.path.splitext(psf_file)[0])
+            sed_basename = os.path.basename(os.path.splitext(sed_file)[0])
+            outfile = conf['outputfile'].format(psf=psf_basename,
+                                                sed=sed_basename)
+
+            if os.path.exists(outfile):
+                continue
+
+            psf = PSFcube.from_fits(psf_file, **conf['psf'])
+
             if conf['sed_type'].lower() == 'fits':
                 sed = SED.from_fits(sed_file, **conf['sed'])
             else:
@@ -110,10 +119,6 @@ def main():
 
             psf.to_broadband(sed=sed, thruput=thruput, **conf['broadband'])
 
-            psf_basename = os.path.basename(os.path.splitext(psf_file)[0])
-            sed_basename = os.path.basename(os.path.splitext(sed_file)[0])
-            outfile = conf['outputfile'].format(psf=psf_basename,
-                                                sed=sed_basename)
             psf.write_effective_psf(outfile)
 
             if conf['down_fact'] > 1:

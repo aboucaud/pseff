@@ -2,6 +2,36 @@
 
 Convert a set of monochromatic PSFs to an effective PSF for a given instrument and stellar SED.
 
+
+1. [Installation](#Installation)
+2. [Preparation](#Preparation)
+3. [Usage](#Usage)
+
+## Installation
+
+### Getting the code
+
+To get the code, clone the git repository
+
+    git clone https://git.ias.u-psud.fr/aboucaud/broadband_psf.git
+
+### Developer's mode
+
+To install the code in developer mode (e.g. not system-wise), go to the downloaded repository
+
+    cd broadband_psf
+
+and use the following command
+
+    pip install -e .
+
+### Check
+
+To make sure the code is installed, open a new terminal and test the command-line
+
+    mk_broadband -h
+
+
 ## Preparation
 
 The code runs on single or multiple files.
@@ -44,13 +74,13 @@ nameformat = {psf}_broadband_{sed}.fits
 ### Single file example
 
 ```bash
-python mk_broadband.py monochromatic_psf_cube.fits stellar_sed.fits -c config_file.txt
+python mk_broadband.py monochromatic_psf_cube.fits stellar_sed.fits -c config_file.ini
 ```
 
 ### Multiple files example
 
 ```bash
-python mk_broadband.py psf*.fits *sed.txt -c config_file.txt
+python mk_broadband.py psf*.fits *sed.txt -c config_file.ini
 ```
 
 This will loop over the input PSF files **and** the various SEDs.
@@ -58,7 +88,7 @@ This will loop over the input PSF files **and** the various SEDs.
 ### Multiprocessing option
 
 ```bash
-python mk_broadband.py psf*.fits *sed.txt -c config_file.txt -n 4
+python mk_broadband.py psf*.fits *sed.txt -c config_file.ini -n 4
 ```
 
 This will run the previous command but use 4 processors in parallel instead.

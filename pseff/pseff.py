@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Broadband PSF
-=============
+PSefF
+=====
 Convert a series of monochromatic PSF images into an instrumental
 broadband PSF given a stellar spectral energy distribution
 
@@ -16,6 +16,9 @@ import numpy as np
 import numpy.fft as npf
 import scipy.ndimage as spn
 import scipy.interpolate as spi
+
+
+__version__ = '0.1.0'
 
 
 class SED(object):

@@ -517,7 +517,7 @@ class PSFcube(object):
 
         """
         # Height of the output height and width.
-        psf_size, rtf_size = data_shape
+        psf_size, _ = data_shape
 
         # Construct the gaussian covariance matrix for the sky AOCS errors
         # units of arcsec squared in real data this would be provided externally
@@ -538,35 +538,31 @@ class PSFcube(object):
         dmatrix = np.matrix([[1 / flength_arcsec, 0],
                              [0, 1 / flength_arcsec]])
 
-        # Assuming the input distortion matrix has been supplied as A^T,
-        # which is what is calculated inside affineDFT,
-        # calculate its inverse to get {A^T}^{-1}
-        # (which is the same as {A^{-1}}^T)
-        mat_d_matrix = dmatrix.I
-
-        # Then the product A^{-1} C {A^T}^{-1}
-        # First transpose {A^T}^{-1} to get A^{-1}
-        mat_d_matrix_t = mat_d_matrix.T
-
         # Multiply by the distortion matrix as in Section 2.3. First create
         # the product C_{G,theta} times the inverse of the distortion matrix.
         # Then multiply to get a new 2x2 matrix, C' as in equation 7.
-        aocs_pixcovar = mat_d_matrix_t * aocs_covariance_matrix * mat_d_matrix
+
+        # Assuming the input distortion matrix has been supplied as A^T,
+        # which is what is calculated inside affineDFT,
+        # calculate its inverse to get {A^T}^{-1} (the same as {A^{-1}}^T)
+        mat_d_matrix = dmatrix.I
+
+        # Then the product A^{-1} C {A^T}^{-1}
+        aocs_pixcovar = mat_d_matrix.T * aocs_covariance_matrix * mat_d_matrix
 
         # Apply additional scaling factors from equation 7.
         aocs_pixcovar *= (2 * np.pi / psf_size) ** 2
 
-        # Make sure we deal with the case x or y = 0, when sinc=1.
-        y, x = np.indices((psf_size, rtf_size), dtype=float)
-
+        y, x = np.indices(data_shape, dtype=float)
         # Separate first and second halves of y values
         y = np.where(y >= psf_size // 2, y - psf_size, y)
 
-        # Matrix product
-        yx = np.indices(data_shape).reshape(2, psf_size * rtf_size)
-        yval, xval = aocs_pixcovar * yx
+        # Matrix product on coordinates
+        yx = np.vstack([y.flatten(), x.flatten()])
+        yval, xval = np.array(aocs_pixcovar * yx)
 
         arg = x * xval.reshape(data_shape) + y * yval.reshape(data_shape)
+
         aocs_weight = np.exp(-arg / 2)
 
         return aocs_weight

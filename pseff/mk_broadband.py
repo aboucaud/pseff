@@ -14,11 +14,13 @@ import time
 import argparse
 import configparser
 import astropy.units as u
+import multiprocessing as mp
 
 from .pseff import PSFcube, TelescopeThroughput, SED
 
 
 def parse_args():
+    """Command-line parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument('psf_cube_files', type=str, nargs='+',
                         help='Monochromatic PSF FITS files')
@@ -26,6 +28,8 @@ def parse_args():
                         help='Source energy distribution of stars')
     parser.add_argument('-c', '--config', type=str, default=None,
                         help="Configuration file")
+    parser.add_argument('-n', '--nprocs', type=int, default=1,
+                        help="Number of processors to use")
 
     return parser.parse_args()
 
@@ -92,39 +96,47 @@ def extract_config(configfile):
                 outputfile=outputfile)
 
 
+def main_wrapper(args):
+    psf_file, sed_file, thruput, conf = args
+
+    psf_basename = os.path.basename(os.path.splitext(psf_file)[0])
+    sed_basename = os.path.basename(os.path.splitext(sed_file)[0])
+    outfile = conf['outputfile'].format(psf=psf_basename,
+                                        sed=sed_basename)
+
+    if os.path.exists(outfile):
+        return
+
+    psf = PSFcube.from_fits(psf_file, **conf['psf'])
+
+    if conf['sed_type'].lower() == 'fits':
+        sed = SED.from_fits(sed_file, **conf['sed'])
+    else:
+        sed = SED.from_ascii(sed_file, **conf['sed'])
+
+    psf.to_broadband(sed=sed, thruput=thruput, **conf['broadband'])
+
+    psf.write_effective_psf(outfile)
+
+    if conf['down_fact'] > 1:
+        psf.downsample_detector(conf['down_fact'])
+        psf.write_effective_psf(outfile.replace('.fits',
+                                                '_downsampled.fits'))
+
+
 def main():
     args = parse_args()
 
     conf = extract_config(args.config)
     thruput = TelescopeThroughput.from_file(**conf['thruput'])
+    arguments = [(psf_file, sed_file, thruput, conf)
+                 for psf_file in args.psf_cube_files
+                 for sed_file in args.sed_files]
 
     start_time = time.time()
 
-    for psf_file in args.psf_cube_files:
-        for sed_file in args.sed_files:
-            psf_basename = os.path.basename(os.path.splitext(psf_file)[0])
-            sed_basename = os.path.basename(os.path.splitext(sed_file)[0])
-            outfile = conf['outputfile'].format(psf=psf_basename,
-                                                sed=sed_basename)
-
-            if os.path.exists(outfile):
-                continue
-
-            psf = PSFcube.from_fits(psf_file, **conf['psf'])
-
-            if conf['sed_type'].lower() == 'fits':
-                sed = SED.from_fits(sed_file, **conf['sed'])
-            else:
-                sed = SED.from_ascii(sed_file, **conf['sed'])
-
-            psf.to_broadband(sed=sed, thruput=thruput, **conf['broadband'])
-
-            psf.write_effective_psf(outfile)
-
-            if conf['down_fact'] > 1:
-                psf.downsample_detector(conf['down_fact'])
-                psf.write_effective_psf(outfile.replace('.fits',
-                                                        '_downsampled.fits'))
+    pool = mp.Pool(processes=args.nprocs)
+    pool.map(main_wrapper, arguments)
 
     dtime = int(time.time() - start_time)
     time_text = ("\n---\n"

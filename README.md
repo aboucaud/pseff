@@ -54,3 +54,11 @@ python mk_broadband.py psf*.fits *sed.txt -c config_file.txt
 ```
 
 This will loop over the input PSF files **and** the various SEDs.
+
+### Multiprocessing option
+
+```bash
+python mk_broadband.py psf*.fits *sed.txt -c config_file.txt -n 4
+```
+
+This will run the previous command but use 4 processors in parallel instead.

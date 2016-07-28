@@ -10,12 +10,8 @@ import numpy.fft as npf
 import scipy.ndimage as spn
 import scipy.interpolate as spi
 
-
 __version__ = '0.1.0'
-__all__ = ['SED',
-           'FlatSED',
-           'TelescopeThroughput',
-           'PSFcube']
+__all__ = ['SED', 'FlatSED', 'TelescopeThroughput', 'PSFcube']
 
 
 class SED(object):

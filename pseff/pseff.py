@@ -439,9 +439,9 @@ class PSFcube(object):
         data_shape: tuple of int
             shape of the RTF of the psf cube
         wavelength: array_like
-            wavelength range
+            wavelength range in nanometers
         pixel_size: int or float
-            output pixel size
+            output pixel size in nanometers
         niemi_params: tuple of floats, optional
             Wavelength dependant measured parameters along x and y axes
 
@@ -599,18 +599,15 @@ class PSFcube(object):
         on wavelength does not depend on pixel oversampling.
 
         """
-        psf_size, rtf_size = data_shape
+        psf_size, _ = data_shape
 
         # Multiply complex array by sinc weight function.
-        y, x = np.indices((psf_size, rtf_size), dtype=float)
+        y, x = np.indices(data_shape, dtype=float)
 
         # Separate first and second halves of y values
         y = np.where(y >= psf_size // 2, y - psf_size, y)
 
-        xarg = np.pi * x / psf_size
-        yarg = np.pi * y / psf_size
-
-        prf_weight = np.sinc(xarg) * np.sinc(yarg)
+        prf_weight = np.sinc(x / psf_size) * np.sinc(y / psf_size)
 
         return prf_weight
 

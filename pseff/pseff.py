@@ -390,10 +390,10 @@ class PSFcube(object):
         self._update_header_info()
 
         header = copy.copy(self.header)
-        comment = ("========================================="
-                   "Broadband PSF created from {} wavelengths"
-                   "=========================================")
+        comment = "Broadband PSF created from {} wavelengths"
+        header.add_comment("=========================================")
         header.add_comment(comment.format(len(self.wavelength)))
+        header.add_comment("=========================================")
         try:
             pyfits.writeto(outfits, data=self.psf,
                            header=header, clobber=clobber)

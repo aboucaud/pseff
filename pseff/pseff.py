@@ -10,7 +10,7 @@ import numpy.fft as npf
 import scipy.ndimage as spn
 import scipy.interpolate as spi
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __all__ = ['SED', 'FlatSED', 'TelescopeThroughput', 'PSFcube', 'u']
 
 

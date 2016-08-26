@@ -4,8 +4,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [Unreleased]
+
+## [0.2.1] - 2016-08-26
 ### Added
 - Installation section in README
+- astropy.units to the imported modules inside pseff (as 'u')
+
+### Fixed
+- from_basel constructor uses P.Hudelot convenient FITS file now
 
 ## [0.2.0] - 2016-07-28
 ### Added
@@ -37,7 +43,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial commit of the code. One single file.
 
 
-[Unreleased]: https://git.ias.u-psud.fr/aboucaud/broadband_psf/compare/v0.2.0...HEAD
+[Unreleased]: https://git.ias.u-psud.fr/aboucaud/broadband_psf/compare/v0.2.1...HEAD
+[0.2.1]: https://git.ias.u-psud.fr/aboucaud/broadband_psf/compare/v0.2.0...v0.2.1
 [0.2.0]: https://git.ias.u-psud.fr/aboucaud/broadband_psf/compare/v0.1.0...v0.2.0
 [0.1.0]: https://git.ias.u-psud.fr/aboucaud/broadband_psf/compare/
 [0.0.1]: https://git.ias.u-psud.fr/aboucaud/broadband_psf/compare/

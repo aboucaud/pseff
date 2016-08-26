@@ -11,7 +11,7 @@ import scipy.ndimage as spn
 import scipy.interpolate as spi
 
 __version__ = '0.2.0'
-__all__ = ['SED', 'FlatSED', 'TelescopeThroughput', 'PSFcube']
+__all__ = ['SED', 'FlatSED', 'TelescopeThroughput', 'PSFcube', 'u']
 
 
 class SED(object):

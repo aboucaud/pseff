@@ -39,21 +39,37 @@ class SED(object):
         self.flambda = flambda
 
     @classmethod
-    def from_basel(cls, filename):
+    def from_basel(cls, filename, idx):
         """
         Construct SED object from BaSeL spectral library
+
+        The original spectra being stored in a very specific formatting
+        totally unpractical, a FITS table was created by P.Hudelot from
+        the version 2.2 of the corrected BaSeL library.
+
+        The first extension stores the wavelength [nm] (1221 values).
+        The second extension is a table of 8315 spectra.
+        The third extension provides Teff, logg and Fe/H for the spectra
 
         Parameters
         ----------
         filename: str
             Path to a BaSeL SED FITS table
+        idx: int
+            Index of the spectra to be considered
+
+        Note
+        ----
+        The spectra are 1-indexed in the table, meaning that in order to
+        retrieve the spectrum of index ID, one needs to call for
+        idx = ID - 1
 
         """
         with pyfits.open(filename) as hdu:
             wl = hdu[1].data
             sed = hdu[2].data
 
-        return cls(wl, sed, wlunit=u.angstrom, flambda=False)
+        return cls(wl, sed[idx], wlunit=u.nm, flambda=False)
 
     @classmethod
     def from_ascii(cls, filename, cols=[0, 1], wlunit=u.angstrom):

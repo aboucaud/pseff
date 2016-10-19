@@ -16,7 +16,7 @@ import configparser
 import astropy.units as u
 import multiprocessing as mp
 
-from .pseff import PSFcube, TelescopeThroughput, SED
+from pseff import PSFcube, TelescopeThroughput, SED
 
 
 def parse_args():

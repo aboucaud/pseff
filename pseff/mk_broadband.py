@@ -12,7 +12,10 @@ from __future__ import print_function, division
 import os
 import time
 import argparse
-import configparser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import astropy.units as u
 import multiprocessing as mp
 

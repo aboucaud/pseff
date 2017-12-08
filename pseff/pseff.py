@@ -10,7 +10,7 @@ import numpy.fft as npf
 import scipy.ndimage as spn
 import scipy.interpolate as spi
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 __all__ = ['SED', 'FlatSED', 'TelescopeThroughput', 'PSFcube', 'u']
 
 
@@ -216,7 +216,10 @@ class TelescopeThroughput(object):
 
 class PSFcube(object):
     "Class that defines a wavelength array of monochromatic PSFs"
-    def __init__(self, wavelength, data, pixel_size, header=None, wlunit=u.um):
+    wlunit = u.nm
+
+    def __init__(self, wavelength, data, pixel_size,
+                 header=None, header_wlunit=u.um):
         """
         Parameters
         ----------
@@ -232,11 +235,10 @@ class PSFcube(object):
             Unit of the wavelength array (default um)
 
         """
-        self.wavelength = wavelength
+        self.wavelength = wavelength * header_wlunit.to(self.wlunit)
         self.psf_cube = data
         self.pixel_size = pixel_size
         self.header = header
-        self.wlunit = wlunit
 
         self._psf_computed = False
 
@@ -262,11 +264,12 @@ class PSFcube(object):
         wavelength = np.empty(n_psf, dtype=float)
 
         for i in range(n_psf):
-            img, hdr = pyfits.getdata(filename, ext=i+1, header=True)
+            img, hdr = pyfits.getdata(filename, ext=i + 1, header=True)
             data[i] = img
             wavelength[i] = float(hdr['WLGTH0'])
 
-        return cls(wavelength, data, pixel_size, header=hdr, wlunit=wlunit)
+        return cls(wavelength, data, pixel_size,
+                   header=hdr, header_wlunit=wlunit)
 
     @property
     def psf(self):
@@ -311,9 +314,9 @@ class PSFcube(object):
             Instance of a stellar SED
         thruput: `TelescopeThroughput`
             Instance of a telescope throughput
-        wl_step: float or int, optional
-            Linear step between wavelength in expanded range
-            (default is 1)
+        wl_step: float, optional
+            Linear wavelength step in expanded range in nanometers
+            (default is 1 nm)
         niemi: bool, optional
             Apply the Niemi effect (default `False`)
         aocs: bool, optional
@@ -327,7 +330,7 @@ class PSFcube(object):
             Image of the broadband PSF
 
         """
-        # Create the range of wavelengths for interpolation
+        # Create the range of wavelengths for interpolation in nm
         self.expanded_range = np.arange(self.wavelength[0],
                                         self.wavelength[-1] + 1,
                                         step=wl_step)
@@ -414,7 +417,7 @@ class PSFcube(object):
             pyfits.writeto(outfits, data=self.psf,
                            header=header, clobber=clobber)
             print("Output image written in {}".format(outfits))
-        except:
+        except OSError:
             print("Output file {} already existing".format(outfits))
 
     def _update_header_info(self):

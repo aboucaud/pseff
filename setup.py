@@ -5,7 +5,7 @@
 # BSD License - see attached LICENSE file
 # Author: Alexandre Boucaud <alexandre.boucaud@ias.u-psud.fr>
 from setuptools import setup, find_packages
-
+""" Fooo """
 
 def find_version(filepath):
     """
